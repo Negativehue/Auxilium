@@ -1,14 +1,10 @@
 from flask import Flask, request, jsonify
 import requests
 import os
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 app = Flask(__name__)
 
-# Fetch API key from environment variable (Do NOT hardcode it)
+# Fetch API key from environment variable
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if not GEMINI_API_KEY:
     raise ValueError("❌ API Key is missing! Set it in the environment variables.")
@@ -43,22 +39,18 @@ def generate_summary_and_reviewer():
         if response.status_code == 200:
             result = response.json()
 
-            # Safely extract AI response
-            ai_response = (
-                result.get("candidates", [{}])[0]
-                .get("content", {})
-                .get("parts", [{}])[0]
-                .get("text", "No response from AI.")
-            )
+            # Extract AI response safely
+            ai_response = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", None)
+            if not ai_response:
+                return jsonify({"error": "Invalid AI response format."}), 500
 
             return jsonify({"response": ai_response})
 
         else:
-            return jsonify({"error": f"API Error: {response.status_code} - {response.text}"}), 500
+            return jsonify({"error": "AI service unavailable, please try again later."}), 500
 
     except Exception as e:
         return jsonify({"error": f"Server Error: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    # Remove debug=True before deployment
     app.run(host="0.0.0.0", port=5000)

@@ -25,7 +25,7 @@ class _GenSumAndRevScreenState extends State<GenSumAndRevScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:5000/generate'),
+        Uri.parse('https://auxilium-atqe.onrender.com/generate'),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "summary_type": _selectedSummary,
